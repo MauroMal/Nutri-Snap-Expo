@@ -61,9 +61,7 @@ export default function TabLayout() {
           options={{
           headerTitle: "Camera",
           tabBarLabel: "Camera",
-          headerStyle: {
-            backgroundColor: 'black',
-          },
+          headerShown: false,
           tabBarIcon: ({ color, focused }) => (
               <Ionicons
               name={focused ? "camera" : "camera-outline"}

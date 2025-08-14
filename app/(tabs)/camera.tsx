@@ -1,12 +1,16 @@
 import { StyleSheet, Button, Linking, View } from "react-native"
 
-import { ThemedText } from "@/components/ThemedText"
-import { ThemedView } from "@/components/ThemedView"
-import { Colors } from "@/constants/Colors"
+import * as React from 'react';
+import { ThemedText } from "@/components/ThemedText";
+import { ThemedView } from "@/components/ThemedView";
+import { Colors } from "@/constants/Colors";
 
-import { useCameraPermissions, useMicrophonePermissions, CameraView } from "expo-camera"
-import { usePermissions as useMediaLibraryPermissions } from "expo-media-library"
-import { useEffect, useRef, useState } from "react"
+import { useCameraPermissions, useMicrophonePermissions, CameraView } from "expo-camera";
+import { usePermissions as useMediaLibraryPermissions } from "expo-media-library";
+import { useEffect, useRef, useState } from "react";
+import IconButton from "@/components/IconButton";
+import BottomRowTools from "@/components/BottomRowTools";
+import MainRowActions from "@/components/MainRowActions";
 
 export default function CameraScreen() {
   const [cameraPermission, requestCameraPermission] = useCameraPermissions()
@@ -54,7 +58,10 @@ export default function CameraScreen() {
 
   return (
     <View style={{ flex: 1 }}>
-      <CameraView ref={cameraRef} style={{ flex: 1 }} />
+      <CameraView ref={cameraRef} style={{ flex: 1 }}>
+        <MainRowActions handleTakePicture={() => {}} />
+        {/* <BottomRowTools /> */}
+      </CameraView>
     </View>
   )
 }
