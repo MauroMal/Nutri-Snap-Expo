@@ -27,14 +27,14 @@ export default function IconButton({
 }: IconButtonProps) {
   return ( <TouchableOpacity
     onPress={onPress}
-    style={[
-      {
-        backgroundColor: "#00000050",
-        padding: CONTAINER_PADDING,
-        borderRadius: (CONTAINER_WIDTH + CONTAINER_PADDING * 2) / 2,
-        width: CONTAINER_WIDTH,
-      },
-      containerStyle]}
+    // style={[
+    //   {
+    //     backgroundColor: "#00000050",
+    //     padding: CONTAINER_PADDING,
+    //     borderRadius: (CONTAINER_WIDTH + CONTAINER_PADDING * 2) / 2,
+    //     width: CONTAINER_WIDTH,
+    //   },
+    //   containerStyle]}
     >
       <SymbolView
         name={iosName}

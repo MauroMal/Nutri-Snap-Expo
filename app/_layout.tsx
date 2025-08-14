@@ -18,7 +18,7 @@ export default function RootLayout() {
   }
 
   return (
-    <ThemeProvider value={colorScheme === 'light' ? DarkTheme : DefaultTheme}>
+    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <Stack>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen
@@ -29,6 +29,12 @@ export default function RootLayout() {
             animation: "fade",
           }}
         />
+        <Stack.Screen
+        name="media-library"
+        options={{
+          presentation: "modal",
+        }}
+      />'
         <Stack.Screen name="+not-found" />
       </Stack>
       <StatusBar style="light" />
