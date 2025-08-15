@@ -1,35 +1,28 @@
 import * as React from "react";
-import { Link, router, Stack } from "expo-router";
-import { Button, ScrollView, Text, TouchableOpacity } from "react-native";
+import { ScrollView, TouchableOpacity, Button, View } from "react-native";
 import { Asset, getAlbumsAsync, getAssetsAsync } from "expo-media-library";
 import { Image } from "expo-image";
-
-interface MediaLibraryProps {
-  setPicture: (uri: string) => void;
-}
+import { Stack, router } from "expo-router";
 
 export default function MediaLibrary() {
   const [assets, setAssets] = React.useState<Asset[]>([]);
   const [selectedImage, setSelectedImage] = React.useState<Asset | null>(null);
 
-  
   React.useEffect(() => {
-    getAlbums();
+    (async () => {
+      const albums = await getAlbumsAsync({ includeSmartAlbums: true });
+      const recents = albums.find((album) => album.title === "Recents");
+      if (recents) {
+        const result = await getAssetsAsync({
+          album: recents,
+          mediaType: "photo",
+          sortBy: "creationTime",
+          first: 100,
+        });
+        setAssets(result.assets);
+      }
+    })();
   }, []);
-
-  async function getAlbums() {
-    const fetchedAlbums = await getAlbumsAsync({
-      includeSmartAlbums: true,
-    });
-
-    // Recents album
-    const albumAssets = await getAssetsAsync({
-      album: fetchedAlbums.find((album) => album.title === "Recents"),
-      mediaType: "photo",
-      sortBy: "creationTime",
-    });
-    setAssets(albumAssets.assets);
-  }
 
   return (
     <>
@@ -39,22 +32,27 @@ export default function MediaLibrary() {
           headerTransparent: true,
           headerBlurEffect: "dark",
           headerLeft: () => (
-            <TouchableOpacity onPress={() => router.back()}>
-              <Text style={{ color: "#1E90FF", paddingLeft: 16 }}>Cancel</Text>
-            </TouchableOpacity>
+            <Button title="Cancel" onPress={() => router.back()} />
           ),
           headerRight: () =>
-            selectedImage && (
-              <TouchableOpacity onPress={() => setPicture(selectedImage.uri)}>
-                <Text style={{ color: "#1E90FF", paddingRight: 16 }}>Select</Text>
-              </TouchableOpacity>
-            ),
+            selectedImage ? (
+              <Button
+                title="Select"
+                onPress={() => {
+                  router.replace({
+                    pathname: "/camera",
+                    params: { image: selectedImage.uri },
+                  });
+                }}
+              />
+            ) : null,
         }}
       />
 
       <ScrollView
         contentContainerStyle={{
-          paddingTop: 50,
+          paddingTop: 60,
+          padding: 2,
           flexDirection: "row",
           flexWrap: "wrap",
         }}
@@ -65,8 +63,8 @@ export default function MediaLibrary() {
             onPress={() => setSelectedImage(photo)}
             style={{
               width: "25%",
-              height: 100,
-              borderWidth: selectedImage?.id === photo.id ? 3 : 0,
+              padding: 2,
+              borderWidth: selectedImage?.id === photo.id ? 2 : 0,
               borderColor: "#1E90FF",
             }}
           >
@@ -74,7 +72,7 @@ export default function MediaLibrary() {
               source={photo.uri}
               style={{
                 width: "100%",
-                height: "100%",
+                height: 100,
               }}
             />
           </TouchableOpacity>

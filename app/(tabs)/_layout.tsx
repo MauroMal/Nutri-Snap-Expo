@@ -19,11 +19,12 @@ export default function TabLayout() {
 
   return (
     <Tabs screenOptions={{
-      tabBarActiveTintColor: '#7ED957',
+      tabBarActiveTintColor: '#fff', //#7ED957
       headerStyle: {
         backgroundColor: '#25292e',
       },
       headerShadowVisible: false,
+      tabBarShowLabel:false ,
       headerTintColor: '#fff',
       tabBarStyle: {
         backgroundColor: '#25292e',
@@ -37,7 +38,7 @@ export default function TabLayout() {
               <Ionicons 
               name={focused ? "home-sharp" : "home-outline"} 
               color = {color} 
-              size={24} 
+              size={26} 
               />
           ),
           }} 
@@ -51,7 +52,7 @@ export default function TabLayout() {
               <Ionicons
               name={focused ? "search" : "search-outline"}
               color={color}
-              size={24}
+              size={26}
               />
           ),
           }}
@@ -66,7 +67,7 @@ export default function TabLayout() {
               <Ionicons
               name={focused ? "camera" : "camera-outline"}
               color={color}
-              size={24}
+              size={26}
               />
           ),
           }}
@@ -80,7 +81,7 @@ export default function TabLayout() {
               <Ionicons
               name={focused ? "bar-chart" : "bar-chart-outline"}
               color={color}
-              size={24}
+              size={26}
               />
           ),
           }}
@@ -94,7 +95,7 @@ export default function TabLayout() {
               <Ionicons
               name={focused ? "person" : "person-outline"}
               color={color}
-              size={24}
+              size={26}
               />
           ),
           }}

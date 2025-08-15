@@ -1,4 +1,6 @@
-import { StyleSheet, Button, Linking, View } from "react-native"
+import { StyleSheet, Button, Linking, View, Alert } from "react-native"
+
+import { useFocusEffect, useIsFocused, useRoute } from "@react-navigation/native"; // Camera turns on only after clicking tab
 
 import * as React from 'react';
 import { ThemedText } from "@/components/ThemedText";
@@ -7,12 +9,13 @@ import { Colors } from "@/constants/Colors";
 
 import { useCameraPermissions, CameraView, CameraMode, FlashMode } from "expo-camera";
 import { usePermissions as useMediaLibraryPermissions } from "expo-media-library";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react"; //callback from camera on
 import IconButton from "@/components/IconButton";
 import BottomRowTools from "@/components/BottomRowTools";
 import MainRowActions from "@/components/MainRowActions";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import PictureView from "@/components/PictureView";
+import MediaLibrary from '../media-library';
 
 export default function CameraScreen() {
   const [cameraPermission, requestCameraPermission] = useCameraPermissions();
@@ -28,20 +31,41 @@ export default function CameraScreen() {
 
   const [picture, setPicture] = React.useState<string>("");
 
+  const isFocused = useIsFocused();  //camera should be on?
+  const [showCamera, setShowCamera] = useState(true);
+
+  useFocusEffect(
+    useCallback(() => {
+      setShowCamera(true); // Tab gained focus
+      return () => {
+        setShowCamera(false); // Tab lost focus (e.g., switched to another tab)
+      };
+    }, [])
+  );
+
   async function handleTakePicture() {
     const response = await cameraRef.current?.takePictureAsync({})
     setPicture(response!.uri);
   }
 
+  const params = useLocalSearchParams();
+  const imageFromLibrary = params.image as string;
+
   useEffect(() => {
     requestCameraPermission()
   }, [])
 
-  const allGranted =
-    cameraPermission?.granted &&
-    mediaPermission?.granted
+  useEffect(() => {
+    if (imageFromLibrary) {
+      setPicture(imageFromLibrary);
+    }
+  }, [imageFromLibrary]);
 
-  if (!cameraPermission ||  !mediaPermission) { /*!micPermission ||*/
+  const allGranted =
+    cameraPermission?.granted 
+    //&& mediaPermission?.granted
+
+  if (!cameraPermission /*||  !mediaPermission*/) { /*!micPermission ||*/
     return (
       <ThemedView style={styles.center}>
         <ThemedText>Checking permissions...</ThemedText>
@@ -59,26 +83,40 @@ export default function CameraScreen() {
         {/* {!micPermission.granted && (
           <ThemedText>Microphone access is required</ThemedText>
         )} */}
-        {!mediaPermission.granted && (
+        {/* {!mediaPermission.granted && (
           <ThemedText>Media library access is required</ThemedText>
-        )}
+        )} */}
         <Button title="Open Settings" onPress={() => Linking.openSettings()} />
       </ThemedView>
     )
   }
   
   const handleGalleryPress = async () => {
-    const { granted } = await requestMediaPermission()
+    const { granted, canAskAgain } = await requestMediaPermission();
+  
     if (granted) {
-      router.push("/media-library")
+      router.push("/media-library");
+    } else if (canAskAgain) {
+      Alert.alert("Permission Required", "We need access to your photos to open the gallery.");
     } else {
-      alert("Media library permission is required to open gallery.")
+      Alert.alert(
+        "Photo Access Blocked",
+        "You’ve previously denied photo access. Would you like to open settings to enable it?",
+        [
+          { text: "Cancel", style: "cancel" },
+          {
+            text: "Settings",
+            onPress: () => Linking.openSettings(),
+          },
+        ]
+      );
     }
-  }
+  };
 
   if (picture) return <PictureView picture={picture} setPicture={setPicture}/>;
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ flex: 1 }}>{
+      showCamera &&
       <CameraView 
         ref={cameraRef} 
         facing={cameraFacing} 
@@ -89,7 +127,9 @@ export default function CameraScreen() {
         <MainRowActions 
           handleTakePicture={handleTakePicture} 
           onPressGallery={handleGalleryPress} 
-          setCameraFacing={setCameraFacing}/>
+          
+          setCameraFacing={setCameraFacing}
+          />
         <BottomRowTools 
           cameraZoom={cameraZoom}
           cameraFlash={cameraFlash}
@@ -99,6 +139,7 @@ export default function CameraScreen() {
           setCameraFlash={setCameraFlash}
           />
       </CameraView>
+      }
     </View>
   )
 }

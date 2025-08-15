@@ -19,8 +19,13 @@ export default function MainRowActions({
   const [latestImage, setLatestImage] = useState<Asset | null>(null)
 
   useEffect(() => {
-    loadLatest()
-  }, [])
+    (async () => {
+      const { granted } = await MediaLibrary.requestPermissionsAsync();
+      if (granted) {
+        loadLatest();
+      }
+    })();
+  }, []);
 
   async function loadLatest() {
     const result = await getAssetsAsync({
@@ -41,11 +46,13 @@ export default function MainRowActions({
   return (
     <View style={styles.wrapper}>
       <View style={styles.pillContainer}>
-        {latestImage && (
-          <TouchableOpacity onPress={onPressGallery} style={styles.imageButton}>
+        <TouchableOpacity onPress={onPressGallery} style={styles.imageButton}>
+          {latestImage ? (
             <Image source={{ uri: latestImage.uri }} style={styles.image} />
-          </TouchableOpacity>
-        )}
+          ) : (
+            <View style={[styles.image, { backgroundColor: "#aaa" }]} />
+          )}
+        </TouchableOpacity>
 
         <TouchableOpacity onPress={handleTakePicture}>
           <SymbolView
