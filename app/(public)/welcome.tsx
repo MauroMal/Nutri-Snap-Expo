@@ -79,7 +79,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#1e90ff",
   },
   greenButton: {
-    backgroundColor: "#00a86b",
+    backgroundColor: "#00cc66",
   },
   buttonText: {
     color: "#fff",

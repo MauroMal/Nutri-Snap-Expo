@@ -1,40 +1,49 @@
 import {
-	createContext,
-	PropsWithChildren,
-	useContext,
-	useEffect,
-	useState,
+  createContext,
+  PropsWithChildren,
+  useContext,
+  useEffect,
+  useState,
 } from "react";
-
 import { Session } from "@supabase/supabase-js";
-
 import { supabase } from "@/lib/supabase";
+import { useRouter } from "expo-router";
 
 type AuthState = {
-	initialized: boolean;
-	session: Session | null;
-	signUp: (email: string, password: string, first_name?: string, last_name?: string) => Promise<void>;
-	signIn: (email: string, password: string) => Promise<void>;
-	signOut: () => Promise<void>;
+  initialized: boolean;
+  session: Session | null;
+  signUp: (
+    email: string,
+    password: string,
+    first_name?: string,
+    last_name?: string
+  ) => Promise<"signed_in" | "needs_verification" | "error" | "error_email_in_use">;
+  signIn: (email: string, password: string) => Promise<void>;
+  signOut: () => Promise<void>;
 };
 
 export const AuthContext = createContext<AuthState>({
-	initialized: false,
-	session: null,
-	signUp: async () => {},
-	signIn: async () => {},
-	signOut: async () => {},
+  initialized: false,
+  session: null,
+  signUp: async () => "error",
+  signIn: async () => {},
+  signOut: async () => {},
 });
 
 export const useAuth = () => useContext(AuthContext);
 
 export function AuthProvider({ children }: PropsWithChildren) {
-	const [initialized, setInitialized] = useState(false);
-	const [session, setSession] = useState<Session | null>(null);
+  const [initialized, setInitialized] = useState(false);
+  const [session, setSession] = useState<Session | null>(null);
 
-	const signUp = async (email: string, password: string, first_name?: string, last_name?: string) => {
+  const signUp = async (
+    email: string,
+    password: string,
+    first_name?: string,
+    last_name?: string
+  ) => {
     const full_name = `${first_name?.trim() ?? ""} ${last_name?.trim() ?? ""}`.trim();
-  
+
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
@@ -42,100 +51,136 @@ export function AuthProvider({ children }: PropsWithChildren) {
         data: {
           full_name,
           email,
-          avatar_url: "", // optional: avoids null value in trigger
+          avatar_url: "",
         },
       },
     });
-  
-    if (error) {
-      console.error("Error signing up:", error);
-      return;
+
+    if (!error && !data.session && !data.user?.aud) {
+      return "error_email_in_use";
     }
   
-    console.log("User signed up:", data.user);
+    if (error) {
+      console.log("Signup error:", error);
+      // This catches verified emails
+      if (error.message.toLowerCase().includes("already registered")) {
+        return "error_email_in_use";
+      }
+      return "error";
+    }
+  
+    // Catch case where email already exists but isn't verified
+    if (!data.session && data.user && data.user.identities?.length === 0) {
+      console.log("Email exists but unverified");
+      return "error_email_in_use";
+    }
   
     if (data.session) {
       setSession(data.session);
+      return "signed_in";
     } else {
-      console.log("No session yet — may need email verification");
+      return "needs_verification";
     }
   };
 
-	const signIn = async (email: string, password: string) => {
-		const { data, error } = await supabase.auth.signInWithPassword({
-			email,
-			password,
-		});
+  const signIn = async (email: string, password: string) => {
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
 
-		if (error) {
-      // throw new Error(error.message);
-			// console.error("Error signing in:", error);
-			// return;
+    if (error) {
       console.error("Error signing in:", error);
       return Promise.reject(error);
-		}
+    }
 
-		if (data.session) {
-			setSession(data.session);
-			console.log("User signed in:", data.user);
-		} else {
-			console.log("No user returned from sign in");
-		}
-	};
+    if (data.session) {
+      setSession(data.session);
+      console.log("User signed in:", data.user);
+    } else {
+      console.log("No user returned from sign in");
+    }
+  };
 
-	const signOut = async () => {
-		const { error } = await supabase.auth.signOut();
+  const signOut = async () => {
+    const { error } = await supabase.auth.signOut();
 
-		if (error) {
-			console.error("Error signing out:", error);
-		} else {
-			console.log("User signed out");
+    if (error) {
+      console.error("Error signing out:", error);
+    } else {
+      console.log("User signed out");
       setSession(null);
-		}
-	};
+    }
+  };
 
-	useEffect(() => {
-		supabase.auth.getSession().then(({ data: { session } }) => {
-			setSession(session);
-		});
-
-		supabase.auth.onAuthStateChange(async (_event, session) => {
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
-    
-      // if signed in, check if profile exists, and insert if missing
+    });
+
+    supabase.auth.onAuthStateChange(async (_event, session) => {
+      setSession(session);
+
       if (session?.user) {
         const { data: existingProfile, error } = await supabase
           .from("profiles")
           .select("id")
           .eq("id", session.user.id)
           .maybeSingle();
-    
+
         if (!existingProfile && !error) {
           const full_name = session.user.user_metadata?.full_name || "";
           const { error: insertError } = await supabase.from("profiles").insert({
-						id: session.user.id,
-						email: session.user.email,
-						full_name,
-					});
-					if (insertError) console.error("Insert failed after auth state change:", insertError);
-					else console.log("Profile inserted after auth state change");
+            id: session.user.id,
+            email: session.user.email,
+            full_name,
+          });
+
+          if (insertError) {
+            console.error("Insert failed after auth state change:", insertError);
+          } else {
+            console.log("Profile inserted after auth state change");
+          }
         }
       }
     });
-		setInitialized(true);
-	}, []);
 
-	return (
-		<AuthContext.Provider
-			value={{
-				initialized,
-				session,
-				signUp,
-				signIn,
-				signOut,
-			}}
-		>
-			{children}
-		</AuthContext.Provider>
-	);
+    setInitialized(true);
+  }, []);
+
+  // Redirect to home if user verifies email and logs in
+  function RedirectAfterVerification() {
+    const router = useRouter();
+
+    useEffect(() => {
+      const { data: subscription } = supabase.auth.onAuthStateChange(
+        (_event, session) => {
+          if (session?.user?.email_confirmed_at) {
+            router.replace("/(protected)/(tabs)");
+          }
+        }
+      );
+
+      return () => {
+        subscription.subscription.unsubscribe();
+      };
+    }, []);
+
+    return null;
+  }
+
+  return (
+    <AuthContext.Provider
+      value={{
+        initialized,
+        session,
+        signUp,
+        signIn,
+        signOut,
+      }}
+    >
+      <RedirectAfterVerification />
+      {children}
+    </AuthContext.Provider>
+  );
 }

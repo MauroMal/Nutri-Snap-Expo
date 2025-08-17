@@ -136,7 +136,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#25292e",
     padding: 16,
-    justifyContent: "center",
+    justifyContent: "space-around",
   },
   authError: {
     color: "#ff4d4d",
@@ -212,7 +212,7 @@ const styles = StyleSheet.create({
     width: "80%",
   },
   greenButton: {
-    backgroundColor: "#00a86b",
+    backgroundColor: "#00cc66",
   },
   redButton: {
     backgroundColor: "orange",

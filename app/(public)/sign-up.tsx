@@ -65,6 +65,8 @@ export default function SignUp() {
       router.replace("/(protected)/(tabs)");
     } else if (result === "needs_verification") {
       setSignUpError("Check your email to verify your account.");
+    } else if (result === "error_email_in_use") {
+      setSignUpError("This email is already in use.");
     } else {
       setSignUpError("Sign-up failed. Please try again.");
     }
@@ -131,6 +133,7 @@ export default function SignUp() {
                 style={styles.passwordInput}
                 onChangeText={onChange}
                 value={value}
+                textContentType="oneTimeCode"
               />
             )}
           />
@@ -155,6 +158,7 @@ export default function SignUp() {
                 style={styles.passwordInput}
                 onChangeText={onChange}
                 value={value}
+                textContentType="oneTimeCode"
               />
             )}
           />
@@ -183,7 +187,16 @@ export default function SignUp() {
         >
           <Text style={styles.buttonText}>Back</Text>
         </TouchableOpacity>
-        {signUpError ? <Text style={styles.authError}>{signUpError}</Text> : null}
+        {signUpError ? <Text
+          style={[
+            styles.authError,
+            signUpError.toLowerCase().includes("check your email")
+              ? styles.successMessage
+              : null,
+          ]}
+        >
+          {signUpError}
+        </Text> : null}
       </View>
     </SafeAreaView>
   );
@@ -261,7 +274,7 @@ const styles = StyleSheet.create({
     width: "80%",
   },
   greenButton: {
-    backgroundColor: "#00a86b",
+    backgroundColor: "#00cc66",
   },
   orangeButton: {
     backgroundColor: "orange",
@@ -269,5 +282,8 @@ const styles = StyleSheet.create({
   buttonText: {
     color: "#fff",
     fontWeight: "bold",
+  },
+  successMessage: {
+    color: "#00cc66",
   },
 });
