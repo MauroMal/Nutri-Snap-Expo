@@ -14,6 +14,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Ionicons } from "@expo/vector-icons";
 import * as z from "zod";
 import { useAuth } from "@/context/supabase-provider";
+import { useEffect } from "react";
+
 
 const formSchema = z
   .object({
@@ -55,6 +57,14 @@ export default function SignUp() {
       confirmPassword: "",
     },
   });
+
+  const { session } = useAuth();
+
+  useEffect(() => {
+    if (session) {
+      router.replace("/(protected)/(tabs)");
+    }
+  }, [session]);
 
   async function onSubmit(data: z.infer<typeof formSchema>) {
     setSignUpError("");
