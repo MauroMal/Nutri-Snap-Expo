@@ -1,43 +1,42 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
-import 'react-native-reanimated';
+import { Stack } from "expo-router";
+import * as SplashScreen from "expo-splash-screen";
+import { AuthProvider, useAuth } from "@/context/supabase-provider";
+import { LogBox } from "react-native";
 
-import { useColorScheme } from '@/hooks/useColorScheme';
+LogBox.ignoreAllLogs(true);
+
+SplashScreen.preventAutoHideAsync();
+
+SplashScreen.setOptions({
+	duration: 400,
+	fade: true,
+});
 
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
-  const [loaded] = useFonts({
-    SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
-  });
+	return (
+		<AuthProvider>
+			<RootNavigator />
+		</AuthProvider>
+	);
+}
 
-  if (!loaded) {
-    // Async font loading only occurs in development.
-    return null;
-  }
+function RootNavigator() {
+	const { initialized, session } = useAuth();
 
-  return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen
-          name="onboarding"
-          options={{
-            presentation: "fullScreenModal",
-            headerShown: false,
-            animation: "fade",
-          }}
-        />
-        <Stack.Screen
-        name="media-library"
-        options={{
-          presentation: "modal",
-        }}
-      />'
-        <Stack.Screen name="+not-found" />
-      </Stack>
-      <StatusBar style="light" />
-    </ThemeProvider>
-  );
+	if (!initialized) return;
+	else {
+		SplashScreen.hideAsync();
+	}
+
+	return (
+		<Stack screenOptions={{ headerShown: false, gestureEnabled: false }}>
+			<Stack.Protected guard={!!session}>
+				<Stack.Screen name="(protected)" />
+			</Stack.Protected>
+
+			<Stack.Protected guard={!session}>
+				<Stack.Screen name="(public)/welcome" />
+			</Stack.Protected>
+		</Stack>
+	);
 }

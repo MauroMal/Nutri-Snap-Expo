@@ -38,7 +38,7 @@ export default function CameraScreen() {
     useCallback(() => {
       setShowCamera(true); // Tab gained focus
       return () => {
-        setShowCamera(false); // Tab lost focus (e.g., switched to another tab)
+        setShowCamera(false); // Tab lost focus
       };
     }, [])
   );
@@ -63,9 +63,8 @@ export default function CameraScreen() {
 
   const allGranted =
     cameraPermission?.granted 
-    //&& mediaPermission?.granted
 
-  if (!cameraPermission /*||  !mediaPermission*/) { /*!micPermission ||*/
+  if (!cameraPermission /*|| !mediaPermission*/) { 
     return (
       <ThemedView style={styles.center}>
         <ThemedText>Checking permissions...</ThemedText>
@@ -80,12 +79,6 @@ export default function CameraScreen() {
         {!cameraPermission.granted && (
           <ThemedText>Camera access is required</ThemedText>
         )}
-        {/* {!micPermission.granted && (
-          <ThemedText>Microphone access is required</ThemedText>
-        )} */}
-        {/* {!mediaPermission.granted && (
-          <ThemedText>Media library access is required</ThemedText>
-        )} */}
         <Button title="Open Settings" onPress={() => Linking.openSettings()} />
       </ThemedView>
     )
