@@ -43,3 +43,4 @@ app-example
 
 .env.local
 /lib
+/app/(protected)/(tabs)/search

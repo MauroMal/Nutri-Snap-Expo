@@ -114,9 +114,21 @@ export function AuthProvider({ children }: PropsWithChildren) {
   };
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-    });
+    const validateSession = async () => {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const { data: user, error } = await supabase.auth.getUser();
+
+      if (user && !error) {
+        setSession(sessionData.session);
+      } else {
+        setSession(null);
+        await supabase.auth.signOut(); // clear invalid session
+      }
+
+      setInitialized(true);
+    };
+
+    validateSession();
 
     supabase.auth.onAuthStateChange(async (_event, session) => {
       setSession(session);
@@ -144,8 +156,6 @@ export function AuthProvider({ children }: PropsWithChildren) {
         }
       }
     });
-
-    setInitialized(true);
   }, []);
 
   // Redirect to home if user verifies email and logs in

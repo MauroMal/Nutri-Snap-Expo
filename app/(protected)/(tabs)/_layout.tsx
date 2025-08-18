@@ -19,6 +19,7 @@ export default function TabLayout() {
 
   return (
     <Tabs screenOptions={{
+        
       tabBarActiveTintColor: '#000', //#7ED957
       headerStyle: {
         backgroundColor: '#fff',
@@ -48,6 +49,7 @@ export default function TabLayout() {
           options={{
           headerTitle: "Search",
           tabBarLabel: "Search",
+          headerShown: false,
           tabBarIcon: ({ color, focused }) => (
               <Ionicons
               name={focused ? "search" : "search-outline"}
@@ -58,27 +60,30 @@ export default function TabLayout() {
           }}
       />
       <Tabs.Screen
-          name="camera"
-          options={{
-          headerTitle: "Camera",
-          tabBarLabel: "Camera",
-          headerShown: false,
-          tabBarIcon: ({ color, focused }) => (
-              <Ionicons
-              name={focused ? "camera" : "camera-outline"}
-              color={color}
-              size={26}
-              />
-          ),
-          }}
-      />
+        name="camera"
+        options={{
+            headerShown: false,
+            tabBarLabel: "Camera",
+            tabBarIcon: ({ color, focused }) => (
+            <Ionicons
+                name={focused ? "camera" : "camera-outline"}
+                color={color}
+                size={26}
+            />
+            ),
+            tabBarStyle: {
+            backgroundColor: "#000",
+            },
+            tabBarActiveTintColor: "#fff",
+            tabBarInactiveTintColor: "#888", 
+        }}
+        />
       <Tabs.Screen
           name="data"
           options={{
           headerTitle: "Log",
           tabBarLabel: "Log",
           headerShown: false,
-          tabBarInactiveBackgroundColor: "#fff",
           tabBarIcon: ({ color, focused }) => (
               <Ionicons
               name={focused ? "bar-chart" : "bar-chart-outline"}

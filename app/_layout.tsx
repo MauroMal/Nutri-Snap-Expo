@@ -24,42 +24,48 @@ export default function RootLayout() {
 }
 
 function RootNavigator() {
-	const { initialized, session } = useAuth();
-	const router = useRouter();
+  const { initialized, session } = useAuth();
 
-	useEffect(() => {
-		const handleUrl = async ({ url }: { url: string }) => {
-			const parsed = Linking.parse(url);
-			if (parsed.path === "verified") {
-				const { data } = await supabase.auth.getSession();
-				if (data.session) {
-					router.replace("/(protected)/(tabs)");
-				}
-			}
-		};
+  useEffect(() => {
+    if (initialized) {
+      SplashScreen.hideAsync();
+    }
+  }, [initialized]);
 
-		// Listen to future and initial deep links
-		const sub = Linking.addEventListener("url", handleUrl);
-		Linking.getInitialURL().then((url) => {
-			if (url) handleUrl({ url });
-		});
+  // Wait for session check to finish
+  if (!initialized) {
+    return null; // or a loading spinner
+  }
 
-		return () => sub.remove();
-	}, []);
+  // // Handle email verification from deep link
+  // useEffect(() => {
+  //   const handleUrl = async ({ url }: { url: string }) => {
+  //     const parsed = Linking.parse(url);
+  //     if (parsed.path === "verified") {
+  //       const { data } = await supabase.auth.getSession();
+  //       if (data.session) {
+  //         router.replace("/(protected)/(tabs)");
+  //       }
+  //     }
+  //   };
 
-	if (!initialized) return;
-	else SplashScreen.hideAsync();
+  //   const sub = Linking.addEventListener("url", handleUrl);
+  //   Linking.getInitialURL().then((url) => {
+  //     if (url) handleUrl({ url });
+  //   });
 
-	return (
-		<Stack screenOptions={{ headerShown: false, gestureEnabled: false }}>
-			<Stack.Protected guard={!!session}>
-				<Stack.Screen name="(protected)" />
-			</Stack.Protected>
+  //   return () => sub.remove();
+  // }, []);
 
-			<Stack.Protected guard={!session}>
-				<Stack.Screen name="(public)/welcome" />
-				<Stack.Screen name="(public)/verified" />
-			</Stack.Protected>
-		</Stack>
-	);
+  return (
+    <Stack screenOptions={{ headerShown: false, gestureEnabled: false }}>
+      <Stack.Protected guard={!!session}>
+        <Stack.Screen name="(protected)" />
+      </Stack.Protected>
+      <Stack.Protected guard={!session}>
+        <Stack.Screen name="(public)/welcome" />
+        <Stack.Screen name="(public)/verified" />
+      </Stack.Protected>
+    </Stack>
+  );
 }

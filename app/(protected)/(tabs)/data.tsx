@@ -84,7 +84,7 @@ export default function DataScreen() {
         edges={['top']} // Only apply safe area to the top
         style={{ flex: 1, padding: 15 }}
       >
-        <Text style={{ fontSize: 30, fontWeight: "bold", padding: 5 }}>
+        <Text style={{ fontSize: 28, fontWeight: "bold" }}>
           Food Log
         </Text>
         <AddFood onAdd={fetchLogs} />

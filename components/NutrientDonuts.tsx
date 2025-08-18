@@ -26,8 +26,26 @@ export default function NutrientDonuts({ logs }: NutrientDonutsProps) {
   );
 
   const renderDonut = (label: string, value: number = 0, max: number = 100) => {
-    const percent = Math.min((value / max) * 100, 100);
-    const color = value > max ? "#f44336" : "#4CAF50";
+    const basePercent = Math.min((value / max) * 100, 100);
+    const overflow = value > max ? ((value - max) / max) * 100 : 0;
+  
+    const data = [];
+  
+    // Green up to the max
+    if (basePercent > 0) {
+      data.push({ value: basePercent, color: "#4CAF50" }); // green
+    }
+  
+    // Red overflow if above max
+    if (overflow > 0) {
+      data.push({ value: overflow, color: "#f44336" }); // red
+    }
+  
+    // Gray remainder only if total is under 100%
+    const totalPercent = basePercent + overflow;
+    if (totalPercent < 100) {
+      data.push({ value: 100 - totalPercent, color: "#e0e0e0" }); // gray
+    }
   
     return (
       <View style={{ alignItems: "center", width: 80, marginHorizontal: 4 }}>
@@ -36,10 +54,8 @@ export default function NutrientDonuts({ logs }: NutrientDonutsProps) {
             donut
             radius={40}
             innerRadius={30}
-            data={[
-              { value: percent || 0.01, color },
-              { value: 100 - percent || 99.99, color: "#e0e0e0" },
-            ]}
+            data={data}
+            startAngle={-90}
           />
           <Text
             style={{

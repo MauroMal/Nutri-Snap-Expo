@@ -47,7 +47,7 @@ export default function PictureView({ picture, setPicture }: PictureViewProps) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: "#000",
     alignItems: "center",
     justifyContent: "center",
     paddingHorizontal: 20
@@ -59,8 +59,7 @@ const styles = StyleSheet.create({
     resizeMode: "contain",
     borderRadius: 12,
     borderColor: "#fff",
-    backgroundColor: "#fff",
-    borderWidth: 4
+    backgroundColor: "#000",
   },
   mainButton: {
     marginTop: 16,
