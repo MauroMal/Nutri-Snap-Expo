@@ -13,14 +13,14 @@ export default function PictureView({ picture, setPicture }: PictureViewProps) {
     <View style={styles.container}>
       <Image source={picture} style={styles.image} />
 
-      <TouchableOpacity style={styles.mainButton}>
+      <TouchableOpacity style={[styles.mainButton, styles.shadow]}>
         <Text style={styles.buttonText}>Main Button</Text>
       </TouchableOpacity>
 
       <View style={styles.sideButtonsContainer}>
         <TouchableOpacity
           onPress={() => setPicture("")}
-          style={[styles.sideButton, { backgroundColor: "#ff4d4d" }]}
+          style={[styles.sideButton, styles.shadow, { backgroundColor: "#ff4d4d" }]}
         >
           <IconButton
             onPress={() => setPicture("")}
@@ -31,7 +31,7 @@ export default function PictureView({ picture, setPicture }: PictureViewProps) {
 
         <TouchableOpacity
           onPress={() => shareAsync(picture)}
-          style={[styles.sideButton, { backgroundColor: "#4d94ff" }]}
+          style={[styles.sideButton,, styles.shadow, { backgroundColor: "#4d94ff" }]}
         >
           <IconButton
             onPress={() => shareAsync(picture)}
@@ -47,24 +47,24 @@ export default function PictureView({ picture, setPicture }: PictureViewProps) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#25292e",
+    backgroundColor: "#fff",
     alignItems: "center",
     justifyContent: "center",
-    paddingHorizontal: 20,
+    paddingHorizontal: 20
   },
   image: {
-    width: "90%",
+    width: "100%",
     height: undefined,
     aspectRatio: 3 / 4,
     resizeMode: "contain",
     borderRadius: 12,
     borderColor: "#fff",
-    backgroundColor: "black",
+    backgroundColor: "#fff",
     borderWidth: 4
   },
   mainButton: {
     marginTop: 16,
-    width: "90%",
+    width: "100%",
     backgroundColor: "green",
     paddingVertical: 12,
     borderRadius: 10,
@@ -78,7 +78,7 @@ const styles = StyleSheet.create({
   sideButtonsContainer: {
     marginTop: 12,
     flexDirection: "row",
-    width: "90%",
+    width: "100%",
     gap: 10,
   },
   sideButton: {
@@ -87,4 +87,10 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     alignItems: "center",
   },
+  shadow: {
+    shadowColor: "#000",
+    shadowRadius: 8,
+    shadowOffset: { height: 6, width: 0 },
+    shadowOpacity: 0.15,
+    }
 });

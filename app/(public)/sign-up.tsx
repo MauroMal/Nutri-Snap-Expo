@@ -93,7 +93,7 @@ export default function SignUp() {
           render={({ field: { onChange, value } }) => (
             <TextInput
               placeholder="First Name"
-              style={styles.input}
+              style={[styles.input, styles.shadow]}
               onChangeText={onChange}
               value={value}
             />
@@ -107,7 +107,7 @@ export default function SignUp() {
           render={({ field: { onChange, value } }) => (
             <TextInput
               placeholder="Last Name"
-              style={styles.input}
+              style={[styles.input, styles.shadow]}
               onChangeText={onChange}
               value={value}
             />
@@ -123,7 +123,7 @@ export default function SignUp() {
               placeholder="Email"
               autoCapitalize="none"
               keyboardType="email-address"
-              style={styles.input}
+              style={[styles.input, styles.shadow]}
               onChangeText={onChange}
               value={value}
             />
@@ -131,7 +131,7 @@ export default function SignUp() {
         />
         {errors.email && <Text style={styles.error}>{errors.email.message}</Text>}
 
-        <View style={styles.passwordWrapper}>
+        <View style={[styles.passwordWrapper, styles.shadow]}>
           <Controller
             control={control}
             name="password"
@@ -154,7 +154,7 @@ export default function SignUp() {
             <Ionicons name={showPassword ? "eye-off" : "eye"} size={22} color="#aaa" />
           </TouchableOpacity>
         </View>
-        {errors.password && <Text style={styles.error}>{errors.password.message}</Text>}
+        {errors.password && <Text style={[styles.error, styles.shadow]}>{errors.password.message}</Text>}
 
         <View style={styles.passwordWrapper}>
           <Controller
@@ -165,7 +165,7 @@ export default function SignUp() {
                 placeholder="Confirm Password"
                 autoCapitalize="none"
                 secureTextEntry={!showConfirm}
-                style={styles.passwordInput}
+                style={[styles.passwordInput, styles.shadow]}
                 onChangeText={onChange}
                 value={value}
                 textContentType="oneTimeCode"
@@ -184,7 +184,7 @@ export default function SignUp() {
         )}
 
         <TouchableOpacity
-          style={[styles.button, styles.greenButton]}
+          style={[styles.button, styles.greenButton, styles.shadow]}
           onPress={handleSubmit(onSubmit)}
           disabled={isSubmitting}
         >
@@ -192,7 +192,7 @@ export default function SignUp() {
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={[styles.button, styles.orangeButton]}
+          style={[styles.button, styles.orangeButton, styles.shadow]}
           onPress={() => router.replace("/(public)/welcome")}
         >
           <Text style={styles.buttonText}>Back</Text>
@@ -215,22 +215,23 @@ export default function SignUp() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#25292e",
+    backgroundColor: "#fff",
     padding: 16,
     justifyContent: "center",
   },
   inner: {
     alignItems: "center",
     justifyContent: "center",
+    bottom: 70
   },
   header: {
-    fontSize: 26,
-    color: "white",
+    fontSize: 30,
+    color: "black",
     fontWeight: "bold",
-    marginBottom: 16,
+    marginBottom: 25,
   },
   input: {
-    backgroundColor: "#25292e",
+    backgroundColor: "#fff",
     borderColor: "#fff",
     borderWidth: 2,
     padding: 12,
@@ -238,7 +239,7 @@ const styles = StyleSheet.create({
     width: "80%",
     fontSize: 18,
     marginBottom: 10,
-    color: "#fff",
+    color: "#000",
   },
   passwordWrapper: {
     width: "80%",
@@ -246,13 +247,13 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   passwordInput: {
-    backgroundColor: "#25292e",
+    backgroundColor: "#fff",
     borderColor: "#fff",
     borderWidth: 2,
     padding: 12,
     borderRadius: 12,
     fontSize: 18,
-    color: "#fff",
+    color: "#000",
     paddingRight: 40,
   },
   eyeButton: {
@@ -296,4 +297,10 @@ const styles = StyleSheet.create({
   successMessage: {
     color: "#00cc66",
   },
+  shadow: {
+  shadowColor: "#000",
+  shadowRadius: 8,
+  shadowOffset: { height: 6, width: 0 },
+  shadowOpacity: 0.35,
+  }
 });

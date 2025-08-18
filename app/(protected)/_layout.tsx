@@ -26,7 +26,7 @@ export default function RootLayout() {
         <Stack.Screen name="media-library" options={{ presentation: "modal" }}/>
         <Stack.Screen name="+not-found" />
       </Stack>
-      <StatusBar style="light" />
+      <StatusBar style="dark" />
     </ThemeProvider>
   );
 }

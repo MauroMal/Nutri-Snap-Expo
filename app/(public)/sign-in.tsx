@@ -65,7 +65,7 @@ export default function SignIn() {
               placeholder="Email"
               autoCapitalize="none"
               keyboardType="email-address"
-              style={styles.input}
+              style={[styles.input, styles.shadow]}
               value={value}
               onChangeText={onChange}
             />
@@ -84,7 +84,7 @@ export default function SignIn() {
                 placeholder="Password"
                 autoCapitalize="none"
                 secureTextEntry={!showPassword}
-                style={styles.passwordInput}
+                style={[styles.passwordInput, styles.shadow]}
                 value={value}
                 onChangeText={onChange}
               />
@@ -106,7 +106,7 @@ export default function SignIn() {
         )}
 
         <TouchableOpacity
-          style={[styles.button, styles.greenButton]}
+          style={[styles.button, styles.greenButton, styles.shadow]}
           onPress={handleSubmit(onSubmit)}
           disabled={isSubmitting}
         >
@@ -118,7 +118,7 @@ export default function SignIn() {
         </TouchableOpacity>
         
         <TouchableOpacity
-          style={[styles.button, styles.redButton]}
+          style={[styles.button, styles.redButton, styles.shadow]}
           onPress={() => router.replace("/(public)/welcome")}
         >
           <Text style={styles.buttonText}>Back</Text>
@@ -134,7 +134,7 @@ export default function SignIn() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#25292e",
+    backgroundColor: "#fff",
     padding: 16,
     justifyContent: "space-around",
   },
@@ -154,16 +154,17 @@ const styles = StyleSheet.create({
   inner: {
     alignItems: "center",
     justifyContent: "center",
+    bottom: 70
   },
   title: {
-    fontSize: 28,
+    fontSize: 30,
     fontWeight: "bold",
-    marginBottom: 24,
-    color: "#fff",
+    marginBottom: 25,
+    color: "#000",
     alignSelf: "center",
   },
   input: {
-    backgroundColor: "#25292e",
+    backgroundColor: "#fff",
     borderColor: "#fff",
     borderWidth: 2,
     padding: 12,
@@ -171,7 +172,7 @@ const styles = StyleSheet.create({
     width: "80%",
     fontSize: 18,
     marginBottom: 10,
-    color: "#fff",
+    color: "#000",
   },
   passwordWrapper: {
     width: "80%",
@@ -179,13 +180,13 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   passwordInput: {
-    backgroundColor: "#25292e",
+    backgroundColor: "#fff",
     borderColor: "#fff",
     borderWidth: 2,
     padding: 12,
     borderRadius: 12,
     fontSize: 18,
-    color: "#fff",
+    color: "#000",
     paddingRight: 40,
   },
   eyeButton: {
@@ -221,4 +222,10 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontWeight: "bold",
   },
+  shadow: {
+    shadowColor: "#000",
+    shadowRadius: 8,
+    shadowOffset: { height: 6, width: 0 },
+    shadowOpacity: 0.35,
+    }
 });

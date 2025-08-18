@@ -19,15 +19,15 @@ export default function TabLayout() {
 
   return (
     <Tabs screenOptions={{
-      tabBarActiveTintColor: '#fff', //#7ED957
+      tabBarActiveTintColor: '#000', //#7ED957
       headerStyle: {
-        backgroundColor: '#25292e',
+        backgroundColor: '#fff',
       },
       headerShadowVisible: false,
       tabBarShowLabel:false ,
-      headerTintColor: '#fff',
+      headerTintColor: '#000',
       tabBarStyle: {
-        backgroundColor: '#25292e',
+        backgroundColor: '#fff',
       },
     }}
     >
@@ -77,6 +77,8 @@ export default function TabLayout() {
           options={{
           headerTitle: "Log",
           tabBarLabel: "Log",
+          headerShown: false,
+          tabBarInactiveBackgroundColor: "#fff",
           tabBarIcon: ({ color, focused }) => (
               <Ionicons
               name={focused ? "bar-chart" : "bar-chart-outline"}

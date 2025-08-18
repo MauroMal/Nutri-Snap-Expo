@@ -16,21 +16,21 @@ export default function WelcomeScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.centerContent}>
-        <Image source={appIcon} style={styles.image} />
+        <Image source={appIcon} style={[styles.image, styles.shadow]} />
         <Text style={styles.title}>NutriSnap</Text>
         <Text style={styles.subtitle}>
           An app for logging food and nutrition
         </Text>
 
         <TouchableOpacity
-          style={[styles.button, styles.blueButton]}
+          style={[styles.button, styles.blueButton, styles.shadow]}
           onPress={() => router.push("/sign-up")}
         >
           <Text style={styles.buttonText}>Sign Up</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={[styles.button, styles.greenButton]}
+          style={[styles.button, styles.greenButton, styles.shadow]}
           onPress={() => router.push("/sign-in")}
         >
           <Text style={styles.buttonText}>Sign In</Text>
@@ -43,12 +43,13 @@ export default function WelcomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#25292e",
+    backgroundColor: "#fff",
     padding: 16,
     justifyContent: "center",
   },
   centerContent: {
     alignItems: "center",
+    bottom: 30,
     gap: 16,
   },
   image: {
@@ -60,11 +61,11 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 40,
     fontWeight: "bold",
-    color: "#fff",
+    color: "#000",
     textAlign: "center",
   },
   subtitle: {
-    color: "#aaa",
+    color: "#000",
     textAlign: "center",
     fontSize: 14,
     marginBottom: 20,
@@ -85,4 +86,10 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontWeight: "bold",
   },
+  shadow: {
+    shadowColor: "#000",
+    shadowRadius: 8,
+    shadowOffset: { height: 6, width: 0 },
+    shadowOpacity: 0.35,
+  }
 });
