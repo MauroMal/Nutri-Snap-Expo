@@ -46,7 +46,7 @@ export default function AddFood({ onAdd }: { onAdd: () => void }) {
     } else {
       resetForm();
       setIsAddingFood(false);
-      onAdd?.(); // ✅ This triggers refresh in parent (DataScreen)
+      onAdd?.(); // This triggers refresh in parent (DataScreen)
     }
   };
 
@@ -99,7 +99,7 @@ function AddButton({ setIsAddingFood }: { setIsAddingFood: React.Dispatch<React.
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "center",
-        backgroundColor: "#4d94ff",
+        backgroundColor: "#007bff",
         borderRadius: 15,
         shadowColor: "#000",
         shadowRadius: 8,

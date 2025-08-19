@@ -20,7 +20,7 @@ export default function PictureView({ picture, setPicture }: PictureViewProps) {
       <View style={styles.sideButtonsContainer}>
         <TouchableOpacity
           onPress={() => setPicture("")}
-          style={[styles.sideButton, styles.shadow, { backgroundColor: "#ff4d4d" }]}
+          style={[styles.sideButton, styles.shadow, { backgroundColor: "red" }]}
         >
           <IconButton
             onPress={() => setPicture("")}
@@ -31,7 +31,7 @@ export default function PictureView({ picture, setPicture }: PictureViewProps) {
 
         <TouchableOpacity
           onPress={() => shareAsync(picture)}
-          style={[styles.sideButton,, styles.shadow, { backgroundColor: "#4d94ff" }]}
+          style={[styles.sideButton,, styles.shadow, { backgroundColor: "#007bff" }]}
         >
           <IconButton
             onPress={() => shareAsync(picture)}
@@ -82,7 +82,7 @@ const styles = StyleSheet.create({
   },
   sideButton: {
     flex: 1,
-    paddingVertical: 12,
+    paddingVertical: 10,
     borderRadius: 10,
     alignItems: "center",
   },

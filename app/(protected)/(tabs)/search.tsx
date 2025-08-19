@@ -9,6 +9,8 @@ import {
   Pressable,
 } from "react-native";
 import { PieChart } from "react-native-gifted-charts";
+import { supabase } from "@/lib/supabase";
+import { useAuth } from "@/context/supabase-provider";
 
 const NutrientDonut = ({ label, value, max }: any) => {
   const safeValue = isNaN(value) ? 0 : value;
@@ -20,9 +22,7 @@ const NutrientDonut = ({ label, value, max }: any) => {
     { value: percent, color },
     { value: 100 - percent, color: "#e0e0e0" },
   ];
-
   const unit = label === "Calories" ? "" : "g";
-
   return (
     <View style={{ alignItems: "center", width: 60, marginHorizontal: 4 }}>
       <PieChart
@@ -43,6 +43,9 @@ export default function SearchScreen() {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
+  const [addingIndex, setAddingIndex] = useState<number | null>(null);
+  const [servings, setServings] = useState("1");
+  const { session } = useAuth();
 
   const [thresholds, setThresholds] = useState({
     calories: "250",
@@ -51,7 +54,6 @@ export default function SearchScreen() {
     fat: "20",
     sugar: "20",
   });
-
   const [tempThresholds, setTempThresholds] = useState(thresholds);
 
   const updateThresholds = () => {
@@ -61,18 +63,34 @@ export default function SearchScreen() {
   const handleSearch = async (text: string) => {
     setQuery(text);
     if (!text) return setResults([]);
-
     setLoading(true);
     try {
-      const res = await fetch(
-        `https://api.nal.usda.gov/fdc/v1/foods/search?query=${text}&api_key=`
-      );
+      const res = await fetch(`https://api.nal.usda.gov/fdc/v1/foods/search?query=${text}&api_key=`);
       const json = await res.json();
       setResults(json.foods || []);
     } catch (e) {
       console.error(e);
     }
     setLoading(false);
+  };
+
+  const handleAddToLog = async (item: any, nutrients: any) => {
+    const multiplier = parseFloat(servings);
+    if (isNaN(multiplier) || multiplier <= 0 || !session?.user?.id) return;
+    const nutrientPer100 = (val: number) => Math.round(val * multiplier);
+    const { error } = await supabase.from("food_log").insert({
+      user_id: session.user.id,
+      food_name: item.description,
+      calories: nutrientPer100(nutrients.calories || 0),
+      protein: nutrientPer100(nutrients.protein || 0),
+      carbs: nutrientPer100(nutrients.carbs || 0),
+      fat: nutrientPer100(nutrients.fat || 0),
+      sugar: nutrientPer100(nutrients.sugar || 0),
+    });
+    if (!error) {
+      setAddingIndex(null);
+      setServings("1");
+    }
   };
 
   return (
@@ -84,19 +102,16 @@ export default function SearchScreen() {
         value={query}
         onChangeText={handleSearch}
       />
-
       <View style={[styles.thresholdBox, styles.shadow]}>
         <Text style={styles.subtext}>Recommended values per 100g (editable)</Text>
-        <View style={[styles.thresholdGrid, styles.shadow]}>
+        <View style={styles.thresholdGrid}>
           {(["calories", "protein", "carbs", "fat", "sugar"] as const).map((key) => (
             <View key={key} style={styles.thresholdColumn}>
               <Text style={styles.subtext}>{key.charAt(0).toUpperCase() + key.slice(1)}</Text>
               <TextInput
                 style={styles.thresholdInput}
                 value={tempThresholds[key]}
-                onChangeText={(text) =>
-                  setTempThresholds((prev) => ({ ...prev, [key]: text }))
-                }
+                onChangeText={(text) => setTempThresholds((prev) => ({ ...prev, [key]: text }))}
                 keyboardType="numeric"
               />
             </View>
@@ -106,53 +121,101 @@ export default function SearchScreen() {
           <Text style={styles.updateButton}>Update</Text>
         </Pressable>
       </View>
-      
-      <View style={styles.scrollWrapper}>
-        <ScrollView
-          contentContainerStyle={styles.resultsContainer}
-          showsVerticalScrollIndicator={false}
-        >
-          {loading ? (
-            <ActivityIndicator />
-          ) : (
-            results.map((item, idx) => {
-              const nutrients: Record<string, number> = {};
-              item.foodNutrients?.forEach((n: any) => {
-                if (n.nutrientName.includes("Protein")) nutrients.protein = n.value;
-                if (n.nutrientName.includes("Carbohydrate")) nutrients.carbs = n.value;
-                if (n.nutrientName.includes("Total lipid")) nutrients.fat = n.value;
-                if (n.nutrientName.includes("Sugars")) nutrients.sugar = n.value;
-                if (n.nutrientName.includes("Energy")) {
-                  nutrients.calories = n.unitName === "kJ"
-                    ? n.value * 0.239
-                    : n.value;
-                }
-              });
-
-              return (
-                <View key={idx} style={styles.card}>
-                  <Text style={styles.foodName}>{item.description}</Text>
-                  {(item.foodCategory || item.brandOwner || item.brandName) && (
-                    <Text style={styles.subinfo}>
-                      {item.foodCategory || ""}{"  "}
-                      {item.brandOwner ? `• ${item.brandOwner}` : ""}
-                      {item.brandName ? ` • ${item.brandName}` : ""}
-                    </Text>
-                  )}
-                  <Text style={styles.servingText}>Serving: per 100g</Text>
-                  <View style={styles.donutsRow}>
-                    <NutrientDonut label="Calories" value={nutrients.calories || 0} max={parseFloat(thresholds.calories) || 0} />
-                    <NutrientDonut label="Protein" value={nutrients.protein || 0} max={parseFloat(thresholds.protein) || 0} />
-                    <NutrientDonut label="Carbs" value={nutrients.carbs || 0} max={parseFloat(thresholds.carbs) || 0} />
-                    <NutrientDonut label="Fat" value={nutrients.fat || 0} max={parseFloat(thresholds.fat) || 0} />
-                    <NutrientDonut label="Sugar" value={nutrients.sugar || 0} max={parseFloat(thresholds.sugar) || 0} />
-                  </View>
+      <ScrollView contentContainerStyle={styles.resultsContainer} showsVerticalScrollIndicator={false}>
+        {loading ? (
+          <ActivityIndicator />
+        ) : (
+          results.map((item, idx) => {
+            const nutrients: Record<string, number> = {};
+            item.foodNutrients?.forEach((n: any) => {
+              if (n.nutrientName.includes("Protein")) nutrients.protein = n.value;
+              if (n.nutrientName.includes("Carbohydrate")) nutrients.carbs = n.value;
+              if (n.nutrientName.includes("Total lipid")) nutrients.fat = n.value;
+              if (n.nutrientName.includes("Sugars")) nutrients.sugar = n.value;
+              if (n.nutrientName.includes("Energy")) {
+                nutrients.calories = n.unitName === "kJ" ? n.value * 0.239 : n.value;
+              }
+            });
+            const isAdding = addingIndex === idx;
+            return (
+              <View key={idx} style={styles.card}>
+                <Text style={styles.foodName}>{item.description}</Text>
+                <Text style={styles.subinfo}>{item.foodCategory || ""} {item.brandOwner ? `• ${item.brandOwner}` : ""}</Text>
+                <Text style={styles.servingText}>Serving: per 100g</Text>
+                <View style={styles.donutsRow}>
+                  <NutrientDonut label="Calories" value={nutrients.calories || 0} max={parseFloat(thresholds.calories) || 0} />
+                  <NutrientDonut label="Protein" value={nutrients.protein || 0} max={parseFloat(thresholds.protein) || 0} />
+                  <NutrientDonut label="Carbs" value={nutrients.carbs || 0} max={parseFloat(thresholds.carbs) || 0} />
+                  <NutrientDonut label="Fat" value={nutrients.fat || 0} max={parseFloat(thresholds.fat) || 0} />
+                  <NutrientDonut label="Sugar" value={nutrients.sugar || 0} max={parseFloat(thresholds.sugar) || 0} />
                 </View>
-              );
-            })
-          )}
-        </ScrollView>
-      </View>
+                {isAdding ? (
+                  <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginTop: 12 }}>
+                  <Pressable
+                    onPress={() => setAddingIndex(null)}
+                    style={{
+                      width: 80,
+                      height: 30,
+                      backgroundColor: "red",
+                      borderRadius: 8,
+                      justifyContent: "center",
+                      alignItems: "center",
+                    }}
+                  >
+                    <Text style={{ color: "white", fontSize: 20 }}>×</Text>
+                  </Pressable>
+                
+                  <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+                    <Text style={{ fontSize: 16 }}>Serving size</Text>
+                    <TextInput
+                      style={{
+                        width: 50,
+                        height: 30,
+                        borderWidth: 1,
+                        borderColor: "#ccc",
+                        borderRadius: 6,
+                        textAlign: "center",
+                        paddingHorizontal: 8,
+                      }}
+                      value={servings}
+                      onChangeText={setServings}
+                      keyboardType="numeric"
+                      placeholder="1"
+                    />
+                  </View>
+                
+                  <Pressable
+                    onPress={() => handleAddToLog(item, nutrients)}
+                    style={{
+                      width: 80,
+                      height: 30,
+                      backgroundColor: "green",
+                      borderRadius: 8,
+                      justifyContent: "center",
+                      alignItems: "center",
+                    }}
+                  >
+                    <Text style={{ color: "white", fontSize: 18 }}>✓</Text>
+                  </Pressable>
+                </View>
+                ) : (
+                  <Pressable onPress={() => setAddingIndex(idx)}
+                  style={{
+                    marginTop: 8,
+                    backgroundColor: "#007bff",
+                    borderRadius: 10,
+                    paddingVertical: 5,
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}>
+                    <Text style={{ color: "white", fontSize: 20, fontWeight: "bold" }}>+</Text>
+                  </Pressable>
+                )}
+              </View>
+            );
+          })
+        )}
+      </ScrollView>
     </View>
   );
 }
@@ -163,14 +226,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     flex: 1,
     backgroundColor: "#fff",
-    overflow: "visible",
   },
   title: {
     fontSize: 30,
     fontWeight: "bold",
-    textAlign: "left",
     marginBottom: 12,
-    paddingHorizontal: 4,
+    alignSelf: "center",
+    paddingTop: 10
   },
   input: {
     backgroundColor: "#f2f2f2",
@@ -218,9 +280,6 @@ const styles = StyleSheet.create({
     color: "#666",
     marginBottom: 4,
   },
-  scrollWrapper: {
-    flex: 1,
-  },
   resultsContainer: {
     paddingBottom: 100,
   },
@@ -228,18 +287,17 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     marginVertical: 10,
     padding: 12,
-    marginHorizontal: 7,
-    borderRadius: 12,
+    borderRadius: 10,
     shadowColor: "#000",
-    shadowOpacity: 0.2,
+    shadowOpacity: 0.3,
     shadowRadius: 6,
     shadowOffset: { width: 0, height: 6 },
     elevation: 5,
   },
   shadow: {
     shadowColor: "#000",
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
     shadowOffset: { width: 0, height: 6 },
     elevation: 5,
   },
