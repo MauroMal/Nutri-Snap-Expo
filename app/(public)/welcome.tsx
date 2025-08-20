@@ -19,7 +19,7 @@ export default function WelcomeScreen() {
         <Image source={appIcon} style={[styles.image, styles.shadow]} />
         <Text style={styles.title}>NutriSnap</Text>
         <Text style={styles.subtitle}>
-          An app for logging food and nutrition
+          For logging food and nutrition
         </Text>
 
         <TouchableOpacity

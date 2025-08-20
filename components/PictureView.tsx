@@ -17,12 +17,13 @@ import { PieChart } from "react-native-gifted-charts";
 import IconButton from "./IconButton";
 import { useAuth } from "@/context/supabase-provider";
 import { supabase } from "@/lib/supabase";
+import * as ImageManipulator from "expo-image-manipulator";
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 interface PictureViewProps {
   picture: string;
   setPicture: React.Dispatch<React.SetStateAction<string>>;
 }
-
 const NutrientDonut = ({ label, value, max }: any) => {
   const safeValue = isNaN(value) ? 0 : value;
   const safeMax = isNaN(max) || max === 0 ? 1 : max;
@@ -51,12 +52,14 @@ const NutrientDonut = ({ label, value, max }: any) => {
 };
 
 export default function PictureView({ picture, setPicture }: PictureViewProps) {
+  const insets = useSafeAreaInsets();
   const [showScroll, setShowScroll] = useState(false);
   const [results, setResults] = useState<any[]>([]);
   const [addingIndex, setAddingIndex] = useState<number | null>(null);
   const [servings, setServings] = useState("1");
   const imageAnim = useRef(new Animated.Value(0)).current;
   const { session } = useAuth();
+  const [showFallback, setShowFallback] = useState(false);
 
   const thresholds = {
     calories: 250,
@@ -80,6 +83,61 @@ export default function PictureView({ picture, setPicture }: PictureViewProps) {
     outputRange: [400, 120],
   });
 
+  const handleDetectFood = async () => {
+    try {
+      const manipulated = await ImageManipulator.manipulateAsync(
+        picture,
+        [],
+        { compress: 0.9, format: ImageManipulator.SaveFormat.JPEG }
+      );
+  
+      const formData = new FormData();
+      formData.append("image", {
+        uri: manipulated.uri,
+        name: "photo.jpg",
+        type: "image/jpeg",
+      } as any);
+  
+      const response = await fetch("http://192.168.0.105:5000/detect", {
+        method: "POST",
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+        body: formData,
+      });
+  
+      const json = await response.json();
+      console.log("Detected foods:", json.foods);
+  
+      if (!json.foods || json.foods.length === 0) {
+        setResults([]);
+        setShowFallback(false);
+        setTimeout(() => {
+          setShowFallback(true);
+        }, 2000); // 2 second delay
+        return;
+      }
+  
+      const allResults: any[] = [];
+  
+      for (const food of json.foods) {
+        const res = await fetch(
+          `https://api.nal.usda.gov/fdc/v1/foods/search?query=${encodeURIComponent(
+            food
+          )}&api_key=sdQ38kNWb7f9txgqt2JqS9NC4opLJQ8ynQYAk6xn`
+        );
+        const data = await res.json();
+        if (data.foods?.length) {
+          allResults.push(...data.foods);
+        }
+      }
+  
+      setResults(allResults);
+    } catch (err) {
+      console.error("Upload or fetch error:", err);
+    }
+  };
+
   const handleAddToLog = async (item: any, nutrients: any) => {
     const multiplier = parseFloat(servings);
     if (isNaN(multiplier) || multiplier <= 0 || !session?.user?.id) return;
@@ -99,19 +157,6 @@ export default function PictureView({ picture, setPicture }: PictureViewProps) {
     }
   };
 
-  useEffect(() => {
-    const fetchApple = async () => {
-      try {
-        const res = await fetch(`https://api.nal.usda.gov/fdc/v1/foods/search?query=apple&api_key=`);
-        const json = await res.json();
-        setResults(json.foods || []);
-      } catch (e) {
-        console.error(e);
-      }
-    };
-    fetchApple();
-  }, []);
-
   return (
     <View style={styles.container}>
       <Text style={styles.title}>NutriSnap</Text>
@@ -122,16 +167,25 @@ export default function PictureView({ picture, setPicture }: PictureViewProps) {
 
       <TouchableOpacity
         style={[styles.mainButton, styles.shadow]}
-        onPress={handleMainButtonPress}
+        onPress={async () => {
+          handleMainButtonPress();
+          await handleDetectFood();
+        }}
       >
         <Text style={styles.buttonText}>Scan</Text>
       </TouchableOpacity>
 
       {showScroll && (
         <View style={styles.scrollWrapper}>
-          <ScrollView contentContainerStyle={styles.scrollViewContent} showsVerticalScrollIndicator={false}>
-            {results.length === 0 ? (
-              <ActivityIndicator />
+          <ScrollView contentContainerStyle={[styles.scrollViewContent, { paddingBottom: insets.bottom + 101 }]} showsVerticalScrollIndicator={false}>
+          {results.length === 0 ? (
+              showFallback ? (
+                <View style={styles.fallbackContainer}>
+                  <Text style={styles.fallbackText}>No food detected. Try again with a clearer image.</Text>
+                </View>
+              ) : (
+                <ActivityIndicator size="large" color="#888" />
+              )
             ) : (
               results.map((item, idx) => {
                 const nutrients: Record<string, number> = {};
@@ -199,7 +253,7 @@ export default function PictureView({ picture, setPicture }: PictureViewProps) {
         </View>
       )}
 
-      <View style={styles.sideButtonsContainer}>
+<View style={[styles.sideButtonsContainer, { paddingBottom: insets.bottom || 24}]}>
         <TouchableOpacity
           onPress={() => setPicture("")}
           style={[styles.sideButton, styles.shadow, { backgroundColor: "red" }]}
@@ -235,9 +289,10 @@ const styles = StyleSheet.create({
   },
   title: {
     color: "#fff",
-    fontSize: 24,
+    fontSize: 30,
     fontWeight: "bold",
     textAlign: "center",
+    marginTop: 20,
     marginBottom: 20,
   },
   imageWrapper: {
@@ -255,10 +310,10 @@ const styles = StyleSheet.create({
   },
   mainButton: {
     backgroundColor: "green",
-    paddingVertical: 12,
+    paddingVertical: 11,
     borderRadius: 10,
     alignItems: "center",
-    marginBottom: 12,
+    marginBottom: 10,
   },
   buttonText: {
     color: "#fff",
@@ -267,7 +322,7 @@ const styles = StyleSheet.create({
   },
   scrollWrapper: {
     flexGrow: 0,
-    height: 420,
+    height: 470,
     marginBottom: 12,
   },
   scrollViewContent: {
@@ -367,7 +422,7 @@ const styles = StyleSheet.create({
   },
   sideButton: {
     flex: 1,
-    paddingVertical: 10,
+    paddingVertical: 9,
     borderRadius: 10,
     alignItems: "center",
   },
@@ -376,5 +431,18 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     shadowOffset: { height: 6, width: 0 },
     shadowOpacity: 0.15,
+  },
+  fallbackContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+    paddingTop: 50,
+    paddingHorizontal: 20,
+  },
+  fallbackText: {
+    color: "#888",
+    fontSize: 16,
+    textAlign: "center",
+    lineHeight: 22,
+    
   },
 });

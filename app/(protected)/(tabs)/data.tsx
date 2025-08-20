@@ -5,8 +5,10 @@ import {
   View,
   Text,
   RefreshControl,
+  TouchableOpacity,
 } from "react-native";
 import AddFood from "@/components/AddFood";
+import { useEffect, useState } from "react";
 import FoodLogList from "@/components/FoodLog";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/supabase-provider";
@@ -15,16 +17,52 @@ import Card from "@/components/ui/Card";
 import WeeklyChart from "@/components/WeeklyChart";
 import NutrientDonuts from "@/components/NutrientDonuts";
 import { SafeAreaView } from "react-native-safe-area-context";
+import ProfileScreen from "@/components/ProfileScreen";
+import { SymbolView } from "expo-symbols"; 
+import { Modal } from "react-native";
+import { useFocusEffect } from "@react-navigation/native";
+import { useCallback } from "react";
 
 export default function DataScreen() {
   const { session } = useAuth();
   const [logs, setLogs] = React.useState<FoodLog[]>([]);
   const [refreshing, setRefreshing] = React.useState(false);
   const [selectedDay, setSelectedDay] = React.useState<number>(new Date().getDay());
+  const [showProfile, setShowProfile] = React.useState(false);
+  const [limits, setLimits] = useState({
+    protein: 150,
+    carbs: 300,
+    fat: 70,
+    sugar: 50,
+    calories: 2500,
+  });
+  
+  const fetchLimits = async () => {
+    const { data, error } = await supabase
+      .from("profiles")
+      .select("protein_limit, carbs_limit, fat_limit, sugar_limit, calories_limit")
+      .eq("id", session?.user?.id)
+      .single();
+  
+    if (data) {
+      setLimits({
+        protein: data.protein_limit,
+        carbs: data.carbs_limit,
+        fat: data.fat_limit,
+        sugar: data.sugar_limit,
+        calories: data.calories_limit,
+      });
+    }
+  };
+  
+  useFocusEffect(
+    useCallback(() => {
+      fetchLimits();
+    }, [session?.user?.id])
+  );
 
   const fetchLogs = async () => {
     if (!session?.user?.id) return;
-
     const { data, error } = await supabase
       .from("food_log")
       .select("*")
@@ -74,7 +112,7 @@ export default function DataScreen() {
         <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
       }
       contentContainerStyle={{
-        paddingBottom: 20,
+        paddingBottom: 90,
         flexGrow: 1,
         backgroundColor: "#fff",
       }}
@@ -84,17 +122,23 @@ export default function DataScreen() {
         edges={['top']} // Only apply safe area to the top
         style={{ flex: 1, padding: 10}}
       >
-        <Text style={{ fontSize: 28, fontWeight: "bold", alignSelf: "center"}}>
-          Food Log
-        </Text>
+        <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 10 }}>
+          <Text style={{ fontSize: 30, fontWeight: "bold" }}>Food Log</Text>
+          <TouchableOpacity onPress={() => setShowProfile(true)}>
+            <SymbolView name="person.crop.circle" size={35} tintColor="#000" />
+          </TouchableOpacity>
+        </View>
+
         <AddFood onAdd={fetchLogs} />
         <Card style={{ marginBottom: 16, marginTop: 16 }}>
-          <WeeklyChart
-            logs={logs}
-            selectedDay={selectedDay}
-            setSelectedDay={setSelectedDay}
-          />
-          <NutrientDonuts logs={selectedDayLogs} />
+        <WeeklyChart
+          logs={logs}
+          selectedDay={selectedDay}
+          setSelectedDay={setSelectedDay}
+          calorieLimit={limits.calories}
+        />
+
+        {limits && <NutrientDonuts logs={selectedDayLogs} limits={limits} />}
         </Card>
         <View
           style={{
@@ -111,6 +155,17 @@ export default function DataScreen() {
         </View>
         <FoodLogList logs={logs} deleteLog={deleteLog} />
       </SafeAreaView>
+      <Modal
+        visible={showProfile}
+        animationType="slide"
+        onRequestClose={() => setShowProfile(false)}
+      >
+        <ProfileScreen 
+          onBack={() => setShowProfile(false)} 
+          limits={limits}
+          setLimits={setLimits}
+        />
+      </Modal>
     </ScrollView>
   );
 }

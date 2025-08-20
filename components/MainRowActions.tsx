@@ -95,6 +95,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 100,
     borderRadius: 999,
     gap: 16,
+    marginBottom: 78
   },
   imageButton: {
     width: 45,

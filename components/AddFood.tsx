@@ -64,12 +64,12 @@ export default function AddFood({ onAdd }: { onAdd: () => void }) {
       {isAddingFood ? (
         <View>
           <Card>
-            <TextInput placeholder="Food name" value={foodName} onChangeText={setFoodName} style={styles.food_nutri} />
-            <TextInput placeholder="Calories" value={calories} onChangeText={(text) => setCalories(text.replace(/[^0-9]/g, ""))} keyboardType="numeric" style={styles.food_nutri} />
-            <TextInput placeholder="Protein (g)" value={protein} onChangeText={setProtein} keyboardType="numeric" style={styles.food_nutri} />
-            <TextInput placeholder="Carbs (g)" value={carbs} onChangeText={setCarbs} keyboardType="numeric" style={styles.food_nutri} />
-            <TextInput placeholder="Fat (g)" value={fat} onChangeText={setFat} keyboardType="numeric" style={styles.food_nutri} />
-            <TextInput placeholder="Sugar (g)" value={sugar} onChangeText={setSugar} keyboardType="numeric" style={styles.food_nutri} />
+            <TextInput placeholder="Food name" placeholderTextColor="#888" value={foodName} onChangeText={setFoodName} style={styles.food_nutri} />
+            <TextInput placeholder="Calories" placeholderTextColor="#888" value={calories} onChangeText={(text) => setCalories(text.replace(/[^0-9]/g, ""))} keyboardType="numeric" style={styles.food_nutri} />
+            <TextInput placeholder="Protein (g)" placeholderTextColor="#888" value={protein} onChangeText={setProtein} keyboardType="numeric" style={styles.food_nutri} />
+            <TextInput placeholder="Carbs (g)" placeholderTextColor="#888" value={carbs} onChangeText={setCarbs} keyboardType="numeric" style={styles.food_nutri} />
+            <TextInput placeholder="Fat (g)" placeholderTextColor="#888" value={fat} onChangeText={setFat} keyboardType="numeric" style={styles.food_nutri} />
+            <TextInput placeholder="Sugar (g)" placeholderTextColor="#888" value={sugar} onChangeText={setSugar} keyboardType="numeric" style={styles.food_nutri} />
           </Card>
 
           <View style={styles.sideButtonsContainer}>

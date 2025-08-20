@@ -5,16 +5,17 @@ import { FoodLog } from "./FoodLog";
 
 type NutrientDonutsProps = {
   logs: FoodLog[];
+  limits: {
+    protein: number;
+    carbs: number;
+    fat: number;
+    sugar: number;
+  };
 };
 
-const maxValues = {
-  protein: 150,
-  carbs: 300,
-  fat: 70,
-  sugar: 50,
-};
+export default function NutrientDonuts({ logs, limits }: NutrientDonutsProps) {
+  if (!limits) return null;
 
-export default function NutrientDonuts({ logs }: NutrientDonutsProps) {
   const totals = logs.reduce(
     (acc, log) => ({
       protein: acc.protein + (log.protein || 0),
@@ -28,25 +29,22 @@ export default function NutrientDonuts({ logs }: NutrientDonutsProps) {
   const renderDonut = (label: string, value: number = 0, max: number = 100) => {
     const basePercent = Math.min((value / max) * 100, 100);
     const overflow = value > max ? ((value - max) / max) * 100 : 0;
-  
+
     const data = [];
-  
-    // Green up to the max
+
     if (basePercent > 0) {
       data.push({ value: basePercent, color: "#4CAF50" }); // green
     }
-  
-    // Red overflow if above max
+
     if (overflow > 0) {
       data.push({ value: overflow, color: "#f44336" }); // red
     }
-  
-    // Gray remainder only if total is under 100%
+
     const totalPercent = basePercent + overflow;
     if (totalPercent < 100) {
       data.push({ value: 100 - totalPercent, color: "#e0e0e0" }); // gray
     }
-  
+
     return (
       <View style={{ alignItems: "center", width: 80, marginHorizontal: 4 }}>
         <View style={{ position: "relative", justifyContent: "center", alignItems: "center" }}>
@@ -73,12 +71,13 @@ export default function NutrientDonuts({ logs }: NutrientDonutsProps) {
     );
   };
 
+  console.log(limits)
   return (
-    <View style={{ flexDirection: "row", justifyContent: "space-around"}}>
-      {renderDonut("Protein", totals.protein, maxValues.protein)}
-      {renderDonut("Carbs", totals.carbs, maxValues.carbs)}
-      {renderDonut("Fat", totals.fat, maxValues.fat)}
-      {renderDonut("Sugar", totals.sugar, maxValues.sugar)}
+    <View style={{ flexDirection: "row", justifyContent: "space-around" }}>
+      {renderDonut("Protein", totals.protein, limits.protein)}
+      {renderDonut("Carbs", totals.carbs, limits.carbs)}
+      {renderDonut("Fat", totals.fat, limits.fat)}
+      {renderDonut("Sugar", totals.sugar, limits.sugar)}
     </View>
   );
 }

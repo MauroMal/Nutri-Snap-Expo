@@ -76,5 +76,6 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0,0,0,0.30)",
     padding: 6,             
     borderRadius: 999,
+    marginBottom: 80
   },
 });

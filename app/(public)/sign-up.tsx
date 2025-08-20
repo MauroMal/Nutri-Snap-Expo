@@ -93,6 +93,7 @@ export default function SignUp() {
           render={({ field: { onChange, value } }) => (
             <TextInput
               placeholder="First Name"
+              placeholderTextColor="#888"
               style={[styles.input, styles.shadow]}
               onChangeText={onChange}
               value={value}
@@ -107,6 +108,7 @@ export default function SignUp() {
           render={({ field: { onChange, value } }) => (
             <TextInput
               placeholder="Last Name"
+              placeholderTextColor="#888"
               style={[styles.input, styles.shadow]}
               onChangeText={onChange}
               value={value}
@@ -121,6 +123,7 @@ export default function SignUp() {
           render={({ field: { onChange, value } }) => (
             <TextInput
               placeholder="Email"
+              placeholderTextColor="#888"
               autoCapitalize="none"
               keyboardType="email-address"
               style={[styles.input, styles.shadow]}
@@ -138,6 +141,7 @@ export default function SignUp() {
             render={({ field: { onChange, value } }) => (
               <TextInput
                 placeholder="Password"
+                placeholderTextColor="#888"
                 autoCapitalize="none"
                 secureTextEntry={!showPassword}
                 style={styles.passwordInput}
@@ -163,6 +167,7 @@ export default function SignUp() {
             render={({ field: { onChange, value } }) => (
               <TextInput
                 placeholder="Confirm Password"
+                placeholderTextColor="#888"
                 autoCapitalize="none"
                 secureTextEntry={!showConfirm}
                 style={[styles.passwordInput, styles.shadow]}

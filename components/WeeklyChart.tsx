@@ -8,10 +8,12 @@ export default function WeeklyChart({
   logs,
   selectedDay,
   setSelectedDay,
+  calorieLimit,
 }: {
   logs: FoodLog[];
   selectedDay: number;
   setSelectedDay: (day: number) => void;
+  calorieLimit: number;
 }) {
   const [barData, setBarData] = useState<{ label: string; value: number }[]>([]);
   const [chartKey, setChartKey] = useState(0);
@@ -40,12 +42,12 @@ export default function WeeklyChart({
     const formattedData = labels.map((label, i) => ({
       label,
       value: dayMap[i],
-      frontColor: dayMap[i] > 2500 ? "#f44336" : "#4CAF50",
+      frontColor: dayMap[i] > calorieLimit ? "#f44336" : "#4CAF50",
     }));
 
     setBarData(formattedData);
     setChartKey((prev) => prev + 1);
-  }, [logs, currentDate]);
+  }, [logs, currentDate, calorieLimit]);
 
   const getWeekRange = (date: Date) => {
     const startOfWeek = new Date(date);
@@ -82,6 +84,7 @@ export default function WeeklyChart({
     day: "numeric",
   });
 
+  //console.log(calorieLimit)
   return (
     <View style={{ padding: 16 }}>
       <Text style={{ fontWeight: "700", fontSize: 18, marginBottom: 8 }}>
@@ -90,7 +93,7 @@ export default function WeeklyChart({
       </Text>
 
       <Text style={{ fontWeight: "700", fontSize: 32, marginBottom: 16 }}>
-        {barData.reduce((sum, d) => sum + d.value, 0)} calories
+        {barData[selectedDay]?.value ?? 0} calories
       </Text>
 
       <BarChart

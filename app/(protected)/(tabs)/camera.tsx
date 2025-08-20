@@ -108,7 +108,7 @@ export default function CameraScreen() {
 
   if (picture) return <PictureView picture={picture} setPicture={setPicture}/>;
   return (
-    <View style={{ flex: 1 }}>{
+    <View style={{ flex: 1}}>{
       showCamera &&
       <CameraView 
         ref={cameraRef} 
@@ -120,7 +120,6 @@ export default function CameraScreen() {
         <MainRowActions 
           handleTakePicture={handleTakePicture} 
           onPressGallery={handleGalleryPress} 
-          
           setCameraFacing={setCameraFacing}
           />
         <BottomRowTools 

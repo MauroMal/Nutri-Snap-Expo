@@ -63,6 +63,7 @@ export default function SignIn() {
           render={({ field: { onChange, value } }) => (
             <TextInput
               placeholder="Email"
+              placeholderTextColor="#888"
               autoCapitalize="none"
               keyboardType="email-address"
               style={[styles.input, styles.shadow]}
@@ -82,6 +83,7 @@ export default function SignIn() {
             render={({ field: { onChange, value } }) => (
               <TextInput
                 placeholder="Password"
+                placeholderTextColor="#888"
                 autoCapitalize="none"
                 secureTextEntry={!showPassword}
                 style={[styles.passwordInput, styles.shadow]}

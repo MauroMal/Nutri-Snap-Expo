@@ -1,6 +1,6 @@
 import * as React from "react";
 import { ScrollView, TouchableOpacity, Button, View } from "react-native";
-import { Asset, getAlbumsAsync, getAssetsAsync } from "expo-media-library";
+import { Asset, getAlbumsAsync, getAssetsAsync, getAssetInfoAsync } from "expo-media-library";
 import { Image } from "expo-image";
 import { Stack, router } from "expo-router";
 
@@ -38,10 +38,14 @@ export default function MediaLibrary() {
             selectedImage ? (
               <Button
                 title="Select"
-                onPress={() => {
+                onPress={async () => {
+                  if (!selectedImage) return;
+                  const assetInfo = await getAssetInfoAsync(selectedImage.id);
+                  const resolvedUri = assetInfo.localUri || assetInfo.uri;
+
                   router.replace({
                     pathname: "/camera",
-                    params: { image: selectedImage.uri },
+                    params: { image: resolvedUri },
                   });
                 }}
               />
