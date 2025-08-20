@@ -1,3 +1,4 @@
+![Logo](./assets/NutriSnapLogo-2.png)
 # NutriSnap
 
 NutriSnap is a mobile nutrition tracking app built with Expo, React Native, TypeScript, and Supabase. Users can snap a picture of their meal, detect the food, fetch nutritional data, and log it to track daily and weekly macro intake.
