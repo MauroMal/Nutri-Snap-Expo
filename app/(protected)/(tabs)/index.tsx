@@ -65,7 +65,7 @@ export default function HomeScreen() {
     if (!text) return setResults([]);
     setLoading(true);
     try {
-      const res = await fetch(`https://api.nal.usda.gov/fdc/v1/foods/search?query=${text}&api_key=sdQ38kNWb7f9txgqt2JqS9NC4opLJQ8ynQYAk6xn`);
+      const res = await fetch(`https://api.nal.usda.gov/fdc/v1/foods/search?query=${text}&api_key=`);
       const json = await res.json();
       setResults(json.foods || []);
     } catch (e) {

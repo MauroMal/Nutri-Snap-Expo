@@ -98,7 +98,7 @@ export default function PictureView({ picture, setPicture }: PictureViewProps) {
         type: "image/jpeg",
       } as any);
   
-      const response = await fetch("http://192.168.0.105:5000/detect", {
+      const response = await fetch("http://5000/detect", {
         method: "POST",
         headers: {
           "Content-Type": "multipart/form-data",
@@ -124,7 +124,7 @@ export default function PictureView({ picture, setPicture }: PictureViewProps) {
         const res = await fetch(
           `https://api.nal.usda.gov/fdc/v1/foods/search?query=${encodeURIComponent(
             food
-          )}&api_key=sdQ38kNWb7f9txgqt2JqS9NC4opLJQ8ynQYAk6xn`
+          )}&api_key=`
         );
         const data = await res.json();
         if (data.foods?.length) {
